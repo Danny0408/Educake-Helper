@@ -90,7 +90,7 @@ Want to improve this script? **Pull requests are welcome and apreciated !** (Sim
 
 ## **🛠 Author & Credits**
 👤 **Danny(https://github.com/Danny0408)**  
-💻 Created with ❤️ for the **Schoom homework haters**  
+💻 Created with ❤️ for the **School homework haters**  
 
 ---
 
