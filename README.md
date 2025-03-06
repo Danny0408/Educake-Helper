@@ -25,9 +25,9 @@ _A simple JavaScript tool to fetch and display correct answers for your Educake 
 4. **Copy and paste the following script into the console, then press Enter:**
    ```javascript
    fetch("https://cdn.jsdelivr.net/gh/Danny0408/Educake-Helper@main/EducakeHelper.js")
-  .then(response => response.text())
-  .then(script => eval(script))
-  .catch(error => console.error("Error loading script:", error));
+   .then(response => response.text())
+   .then(script => eval(script))
+   .catch(error => console.error("Error loading script:", error));
    ```
 5. The script will run automatically, and a **"Show Answers"** button will appear.
 
