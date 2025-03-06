@@ -1,147 +1,202 @@
 (async function() {
-    // Get the authorization token from sessionStorage
-    let authToken = sessionStorage.getItem("token");
+    window.currentInput = null;
+    document.addEventListener("focusin", (e) => {
+        if (e.target.matches("input[type='text'], input[type='search'], input[name='answer'], textarea")) {
+            window.currentInput = e.target;
+        }
+    }, true);
 
-    // Function to get XSRF-TOKEN from cookies
+    const loadingBox = document.createElement("div");
+    Object.assign(loadingBox.style, {
+        position: "fixed",
+        bottom: "20px",
+        right: "20px",
+        padding: "10px 15px",
+        background: "rgba(0, 0, 0, 0.9)",
+        color: "#fff",
+        borderRadius: "8px",
+        fontFamily: "Arial, sans-serif",
+        fontSize: "14px",
+        zIndex: 9999,
+        boxShadow: "0 0 10px rgba(0, 255, 0, 0.3)"
+    });
+    loadingBox.innerText = "Loading answers, please wait...";
+    document.body.appendChild(loadingBox);
+
+    const authToken = sessionStorage.getItem("token");
+    if (!authToken) {
+        loadingBox.innerText = "Auth token not found. Make sure you're logged in.";
+        return;
+    }
+
     function getXsrfToken() {
-        let match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+        const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
         return match ? decodeURIComponent(match[1]) : null;
     }
-    let xsrfToken = getXsrfToken();
-
-    if (!authToken) {
-        alert("Authorization token not found in sessionStorage. Ensure you're logged in.");
-        return;
-    }
-
+    const xsrfToken = getXsrfToken();
     if (!xsrfToken) {
-        alert("XSRF token not found in cookies. Ensure you're logged in.");
+        loadingBox.innerText = "XSRF token not found. Make sure you're logged in.";
         return;
     }
 
-    // Extract Quiz ID from URL
-    let match = window.location.pathname.match(/quiz\/(\d+)/);
-    if (!match) {
-        alert("Make sure you're on the quiz page.");
+    const quizMatch = window.location.pathname.match(/quiz\/(\d+)/);
+    if (!quizMatch) {
+        loadingBox.innerText = "No quiz ID found. Make sure you're on a quiz page.";
         return;
     }
-    let quizId = match[1];
+    const quizId = quizMatch[1];
 
-    console.log("Quiz ID:", quizId);
-    console.log("Using Auth Token:", authToken);
-    console.log("Using XSRF Token:", xsrfToken);
-
-    // Create answer box with loading message
-    createAnswerBox("Fetching answers, please wait...");
-
+    let quizData;
     try {
-        // Fetch quiz data
-        let quizResponse = await fetch(`https://my.educake.co.uk/api/student/quiz/${quizId}`, {
-            method: 'GET',
+        const quizResponse = await fetch(`https://my.educake.co.uk/api/student/quiz/${quizId}`, {
+            method: "GET",
             headers: {
-                'Accept': 'application/json;version=2',
-                'Authorization': `Bearer ${authToken}`,
-                'X-XSRF-TOKEN': xsrfToken
+                Accept: "application/json;version=2",
+                Authorization: `Bearer ${authToken}`,
+                "X-XSRF-TOKEN": xsrfToken
             }
         });
-
         if (!quizResponse.ok) throw new Error("Failed to fetch quiz data.");
-
-        let quizData = await quizResponse.json();
-
-        // Extract question IDs
-        let questionIds = quizData.attempt[quizId]?.questions;
-        if (!questionIds || questionIds.length === 0) {
-            updateAnswerBox("No questions found in the quiz.");
-            return;
-        }
-
-        console.log(`Found ${questionIds.length} questions.`);
-
-        let answers = [];
-
-        // Fetch correct answers for each question
-        for (let i = 0; i < questionIds.length; i++) {
-            let questionId = questionIds[i];
-            try {
-                let response = await fetch(`https://my.educake.co.uk/api/course/question/${questionId}/mark`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json;version=2',
-                        'Authorization': `Bearer ${authToken}`,
-                        'X-XSRF-TOKEN': xsrfToken,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ "givenAnswer": "1" }) // Dummy answer to get correct answer
-                });
-
-                if (!response.ok) {
-                    console.warn(`Failed to fetch answer for Question ${i + 1} (ID: ${questionId})`);
-                    continue;
-                }
-
-                let data = await response.json();
-
-                // Check if response contains the correct answer
-                let correctAnswer = data.answer?.correctAnswers?.join(", ");
-                if (correctAnswer) {
-                    answers.push(`Question ${i + 1}: <b>${correctAnswer}</b>`);
-                } else {
-                    answers.push(`Question ${i + 1}: No answer found`);
-                }
-
-            } catch (error) {
-                console.error(`Error fetching answer for Question ${i + 1} (ID: ${questionId}):`, error);
-            }
-        }
-
-        if (answers.length === 0) {
-            updateAnswerBox("No answers were retrieved.");
-        } else {
-            updateAnswerBox(answers.join("<br><br>"));
-        }
-
+        quizData = await quizResponse.json();
     } catch (error) {
-        console.error("Error:", error);
-        updateAnswerBox("An error occurred while fetching answers.");
+        loadingBox.innerText = "Error loading quiz data. Check console.";
+        console.error(error);
+        return;
     }
 
-    // Function to create the floating answer box
-    function createAnswerBox(initialMessage) {
-        if (document.getElementById("answerBox")) return;
+    const questionIds = quizData.attempt[quizId]?.questions;
+    if (!questionIds || questionIds.length === 0) {
+        loadingBox.innerText = "No questions found in this quiz.";
+        return;
+    }
 
-        let answerBox = document.createElement("div");
+    const allAnswers = [];
+    for (let i = 0; i < questionIds.length; i++) {
+        const questionId = questionIds[i];
+        try {
+            const response = await fetch(`https://my.educake.co.uk/api/course/question/${questionId}/mark`, {
+                method: "POST",
+                headers: {
+                    Accept: "application/json;version=2",
+                    Authorization: `Bearer ${authToken}`,
+                    "X-XSRF-TOKEN": xsrfToken,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ givenAnswer: "1" })
+            });
+            if (!response.ok) continue;
+            const data = await response.json();
+            const correctAnswers = data.answer?.correctAnswers;
+            if (correctAnswers && correctAnswers.length > 0) {
+                allAnswers.push({
+                    questionNumber: i + 1,
+                    correctAnswers
+                });
+            }
+        } catch (error) {
+            console.error(`Error fetching answer for Question ${i + 1}:`, error);
+        }
+    }
+
+    if (allAnswers.length === 0) {
+        loadingBox.innerText = "No answers were retrieved.";
+        return;
+    }
+
+    loadingBox.remove();
+    createUI(allAnswers);
+
+    function createUI(allAnswers) {
+        const answerBox = document.createElement("div");
+        Object.assign(answerBox.style, {
+            position: "fixed",
+            bottom: "20px",
+            right: "20px",
+            width: "350px",
+            maxHeight: "400px",
+            overflowY: "auto",
+            padding: "15px",
+            background: "rgba(0, 0, 0, 0.9)",
+            color: "#fff",
+            borderRadius: "10px",
+            boxShadow: "0 0 10px rgba(0, 255, 0, 0.5)",
+            fontFamily: "Arial, sans-serif",
+            fontSize: "14px",
+            zIndex: 9999,
+            display: "none"
+        });
         answerBox.id = "answerBox";
-        answerBox.style.position = "fixed";
-        answerBox.style.bottom = "20px";
-        answerBox.style.right = "20px";
-        answerBox.style.width = "350px";
-        answerBox.style.maxHeight = "400px";
-        answerBox.style.overflowY = "auto";
-        answerBox.style.padding = "15px";
-        answerBox.style.background = "rgba(0, 0, 0, 0.9)";
-        answerBox.style.color = "#fff";
-        answerBox.style.borderRadius = "10px";
-        answerBox.style.boxShadow = "0 0 10px rgba(0, 255, 0, 0.5)";
-        answerBox.style.fontFamily = "Arial, sans-serif";
-        answerBox.style.fontSize = "14px";
-        answerBox.style.zIndex = "9999";
-        answerBox.style.display = "none"; // Hidden by default
 
-        let answerContent = document.createElement("div");
-        answerContent.id = "answerContent";
-        answerContent.innerHTML = initialMessage;
+        const answerContent = document.createElement("div");
 
-        let closeButton = document.createElement("button");
+        const heading = document.createElement("h2");
+        heading.innerText = "Educake Answers";
+        heading.style.marginTop = "0";
+        heading.style.fontSize = "16px";
+        heading.style.borderBottom = "1px solid #666";
+        heading.style.paddingBottom = "5px";
+        heading.style.textAlign = "center";
+        heading.style.marginBottom = "10px";
+        answerContent.appendChild(heading);
+
+        allAnswers.forEach(({ questionNumber, correctAnswers }) => {
+            const questionDiv = document.createElement("div");
+            questionDiv.style.marginBottom = "15px";
+
+            const qTitle = document.createElement("div");
+            qTitle.style.fontWeight = "bold";
+            qTitle.innerText = `Question ${questionNumber}:`;
+            questionDiv.appendChild(qTitle);
+
+            correctAnswers.forEach((singleAnswer) => {
+                const ansLine = document.createElement("div");
+                ansLine.style.marginLeft = "8px";
+                ansLine.style.marginBottom = "6px";
+                ansLine.innerHTML = `\u2022 ${singleAnswer}`;
+
+                const answerBtn = document.createElement("button");
+                answerBtn.innerText = "Auto-Answer";
+                Object.assign(answerBtn.style, {
+                    marginLeft: "10px",
+                    padding: "4px 6px",
+                    border: "none",
+                    borderRadius: "4px",
+                    background: "#4aff4a",
+                    color: "#000",
+                    cursor: "pointer"
+                });
+                answerBtn.onmousedown = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                };
+                answerBtn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    autoAnswer(singleAnswer);
+                };
+
+                ansLine.appendChild(answerBtn);
+                questionDiv.appendChild(ansLine);
+            });
+
+            answerContent.appendChild(questionDiv);
+        });
+
+        const closeButton = document.createElement("button");
         closeButton.innerText = "Close";
-        closeButton.style.marginTop = "10px";
-        closeButton.style.padding = "5px 10px";
-        closeButton.style.border = "none";
-        closeButton.style.borderRadius = "5px";
-        closeButton.style.background = "#ff3333";
-        closeButton.style.color = "#fff";
-        closeButton.style.cursor = "pointer";
-        closeButton.onclick = function() {
+        Object.assign(closeButton.style, {
+            marginTop: "10px",
+            padding: "5px 10px",
+            border: "none",
+            borderRadius: "5px",
+            background: "#ff3333",
+            color: "#fff",
+            cursor: "pointer",
+            display: "block",
+            marginLeft: "auto",
+            marginRight: "auto"
+        });
+        closeButton.onclick = () => {
             answerBox.style.display = "none";
         };
 
@@ -149,38 +204,75 @@
         answerBox.appendChild(closeButton);
         document.body.appendChild(answerBox);
 
-        let toggleButton = document.createElement("button");
-        toggleButton.innerText = "Show Answers";
-        toggleButton.id = "toggleButton";
-        toggleButton.style.position = "fixed";
-        toggleButton.style.bottom = "20px";
-        toggleButton.style.left = "20px";
-        toggleButton.style.padding = "10px";
-        toggleButton.style.border = "none";
-        toggleButton.style.borderRadius = "5px";
-        toggleButton.style.background = "#00ff00";
-        toggleButton.style.color = "#000";
-        toggleButton.style.cursor = "pointer";
-        toggleButton.style.zIndex = "9999";
-        toggleButton.onclick = function() {
-            let box = document.getElementById("answerBox");
-            if (box.style.display === "none") {
-                box.style.display = "block";
-                toggleButton.innerText = "Hide Answers";
+        const toggleBtn = document.createElement("button");
+        toggleBtn.innerText = "Show Answers";
+        Object.assign(toggleBtn.style, {
+            position: "fixed",
+            bottom: "20px",
+            left: "20px",
+            padding: "10px",
+            border: "none",
+            borderRadius: "5px",
+            background: "#00ff00",
+            color: "#000",
+            cursor: "pointer",
+            zIndex: 9999
+        });
+        toggleBtn.onclick = () => {
+            if (answerBox.style.display === "none") {
+                answerBox.style.display = "block";
+                toggleBtn.innerText = "Hide Answers";
             } else {
-                box.style.display = "none";
-                toggleButton.innerText = "Show Answers";
+                answerBox.style.display = "none";
+                toggleBtn.innerText = "Show Answers";
             }
         };
 
-        document.body.appendChild(toggleButton);
+        document.body.appendChild(toggleBtn);
     }
 
-    // Function to update the answer box content
-    function updateAnswerBox(content) {
-        let answerContent = document.getElementById("answerContent");
-        if (answerContent) {
-            answerContent.innerHTML = content;
+    function autoAnswer(answerText) {
+        if (
+            window.currentInput &&
+            window.currentInput.matches("input[type='text'], input[type='search'], input[name='answer'], textarea")
+        ) {
+            typeIntoInput(window.currentInput, answerText);
+            return;
         }
+
+        const possibleClickables = document.querySelectorAll("button, [role='option'], li.btn, .btn");
+        const wantedText = answerText.trim().toLowerCase().replace(/\s+/g, " ");
+        let found = false;
+
+        for (let el of possibleClickables) {
+            let text = el.textContent
+                .replace(/\s+/g, " ")
+                .trim()
+                .toLowerCase();
+            if (text.includes(wantedText)) {
+                el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            alert(`No matching multiple-choice button found for: "${answerText}".`);
+        }
+    }
+
+    function typeIntoInput(inputElem, text) {
+        inputElem.focus();
+        let idx = 0;
+        function step() {
+            if (idx < text.length) {
+                const event = new InputEvent("input", { bubbles: true });
+                inputElem.value += text[idx];
+                inputElem.dispatchEvent(event);
+                idx++;
+                setTimeout(step, 100);
+            }
+        }
+        step();
     }
 })();
