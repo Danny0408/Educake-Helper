@@ -78,7 +78,7 @@ We are **not responsible** for how you use this tool.
 ---
 
 ## **💻 Contributing**
-Want to improve this script? **Pull requests are welcome and apreciated !**  
+Want to improve this script? **Pull requests are welcome and apreciated !** (Simply a project me and chatGPT made in class)
 
 ### **To contribute:**
 1. **Fork this repository** 🍴
