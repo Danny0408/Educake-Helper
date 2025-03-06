@@ -1,5 +1,6 @@
 # **📖 Educake Helper - Console Script**
 _A simple JavaScript tool to fetch and display correct answers for your Educake quizzes._
+ CHAT GPT MADE THIS BRANCH I HAVE 0 IDEA WHATS GOING ON ANYMORE
 
 <img src="https://github.com/Danny0408/Educake-Helper/blob/main/Preview.png" width="300">
 
@@ -24,10 +25,11 @@ _A simple JavaScript tool to fetch and display correct answers for your Educake 
    - **Safari:** Press `Command + Option + C` (You may need to enable Developer Mode first in Safari Preferences.)
 4. **Copy and paste the following script into the console, then press Enter:**
    ```javascript
-   fetch("https://cdn.jsdelivr.net/gh/Danny0408/Educake-Helper@main/EducakeHelper.js")
+   fetch("https://cdn.jsdelivr.net/gh/Danny0408/Educake-Helper@Auto-Answer-test/EducakeHelper.js")
    .then(response => response.text())
    .then(script => eval(script))
    .catch(error => console.error("Error loading script:", error));
+
    ```
 5. The script will run automatically, and a **"Show Answers"** button will appear.
 
