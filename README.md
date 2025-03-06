@@ -24,7 +24,10 @@ _A simple JavaScript tool to fetch and display correct answers for your Educake 
    - **Safari:** Press `Command + Option + C` (You may need to enable Developer Mode first in Safari Preferences.)
 4. **Copy and paste the following script into the console, then press Enter:**
    ```javascript
-   (function(){let s=document.createElement('script');s.src='https://raw.githubusercontent.com/Danny0408/Educake-Helper/refs/heads/main/EducakeHelper.js';document.body.appendChild(s);})(); 
+   fetch("https://cdn.jsdelivr.net/gh/Danny0408/Educake-Helper@main/EducakeHelper.js")
+  .then(response => response.text())
+  .then(script => eval(script))
+  .catch(error => console.error("Error loading script:", error));
    ```
 5. The script will run automatically, and a **"Show Answers"** button will appear.
 
