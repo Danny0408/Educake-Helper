@@ -1,7 +1,7 @@
 # **📖 Educake Helper - Bookmarklet**
 _A simple JavaScript tool to fetch and display correct answers for your Educake quizzes._
 
-![Educake Helper Demo](https://via.placeholder.com/800x400?text=Educake+Helper+Preview)  
+![Educake Helper Demo](https://github.com/Danny0408/Educake-Helper/blob/main/Preview.png)  
 *(Replace the image above with an actual screenshot of the tool in action.)*
 
 ---
