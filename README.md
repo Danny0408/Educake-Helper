@@ -15,7 +15,7 @@ _A simple JavaScript tool to fetch and display correct answers for your Educake 
 
 ## **📥 Installation (Bookmarklet)**  
 ### **1️⃣ Save the Bookmarklet in Your Browser**
-1. Open your web browser (Chrome, Firefox, Edge, etc.).
+1. Open your web browser (Chrome, Firefox, Brave, etc.).
 2. **Bookmark any webpage** (e.g., Google).
 3. Open your **Bookmarks Manager**:
    - **Chrome:** Press `Ctrl + Shift + O`
@@ -26,7 +26,6 @@ _A simple JavaScript tool to fetch and display correct answers for your Educake 
      ```javascript
      javascript:(function(){let s=document.createElement('script');s.src='https://raw.githubusercontent.com/Danny0408/Educake-Helper/refs/heads/main/EducakeHelper.js';document.body.appendChild(s);})(); 
      ```
-   - *(Replace `YOUR-USERNAME/YOUR-REPO` with your actual GitHub repository details.)*
 5. **Save the bookmark.**
 
 ---
@@ -34,9 +33,9 @@ _A simple JavaScript tool to fetch and display correct answers for your Educake 
 ## **🛠 How to Use**
 1. **Go to an Educake quiz page** *(Make sure you’re logged in to Educake).*  
 2. Click the **"Educake Helper"** bookmark you created.  
-3. Wait for `"Fetching answers, please wait..."` to appear on the screen.  
-4. Click the **"Show Answers"** button to reveal the correct answers!  
-5. Click **"Hide Answers"** when you're done.  
+3. Click the **"Show Answers"** button
+4. Wait for it to`"Fetching answers"` and they will display.
+5. Click **"Hide Answers"** if your in class and dont want anybody to see.  
 
 💡 _The answers will appear in a floating box in the bottom-right corner._  
 
@@ -54,7 +53,7 @@ _A simple JavaScript tool to fetch and display correct answers for your Educake 
 |--------|----------|
 | **Bookmarklet doesn't work?** | Make sure you're on an **Educake quiz page** before clicking the bookmark. |
 | **Answers don’t appear?** | Reload the page and **try again**. Ensure you are **logged into Educake**. |
-| **Nothing happens when I click the bookmark?** | Check the browser console (`F12 → Console`) for errors. |
+| **Nothing happens when I click the bookmark?** | Check the browser console (`F12 → Console`) for errors. Copy and submit an issue ticket. |
 
 ---
 
@@ -66,7 +65,7 @@ No, this tool **only displays the correct answers** for reference. It does **not
 This script simply fetches answers that are already available on the website. However, **use it responsibly and at your own risk**.
 
 ### ❓ Does this work on mobile?
-Yes! You can save the bookmarklet in **Chrome Mobile or Safari**, then run it just like on a desktop.
+Yes! You can save the bookmarklet in **Chrome Mobile or Safari**, then run it just like on a desktop. I have had issues on safari though.
 
 ---
 
@@ -79,31 +78,22 @@ We are **not responsible** for how you use this tool.
 ---
 
 ## **💻 Contributing**
-Want to improve this script? **Pull requests are welcome!**  
+Want to improve this script? **Pull requests are welcome and apreciated !**  
 
 ### **To contribute:**
 1. **Fork this repository** 🍴
 2. **Clone your fork** 🔥  
-   ```bash
-   git clone https://github.com/YOUR-USERNAME/YOUR-REPO.git
-   ```
-3. **Make changes & push** 🚀  
-   ```bash
-   git add .
-   git commit -m "Improved Educake Helper UI"
-   git push origin main
-   ```
+ 
 4. **Create a Pull Request** ✅  
 
 ---
 
 ## **🛠 Author & Credits**
-👤 **[Your Name](https://github.com/YOUR-USERNAME)**  
-💻 Created with ❤️ for the **Educake Community**  
+👤 **Danny(https://github.com/Danny0408)**  
+💻 Created with ❤️ for the **Schoom homework haters**  
 
 ---
 
 ## **⭐ Star This Repo!**
 If you found this helpful, consider **starring ⭐ this repo** to support the project!  
 
-📢 **Share this tool with your friends who use Educake!** 🚀
