@@ -1,4 +1,4 @@
-# **📖 Educake Helper -
+# **📖 Educake Helper - Console Script**
 _A simple JavaScript tool to fetch and display correct answers for your Educake quizzes._
 
 <img src="https://github.com/Danny0408/Educake-Helper/blob/main/Preview.png" width="300">
@@ -9,33 +9,33 @@ _A simple JavaScript tool to fetch and display correct answers for your Educake 
 ✔️ **Fetches quiz answers automatically**  
 ✔️ **Displays answers in a user-friendly, toggleable box**  
 ✔️ **Works on both mobile and desktop**  
-✔️ **No need to install extensions – just a simple bookmarklet!**  
+✔️ **No need to install extensions – just copy and paste the script!**  
 
 ---
 
-## **📥 Installation (Bookmarklet)**  
-### **1️⃣ Save the Bookmarklet in Your Browser**
+## **📥 How to Run the Script in Console**  
+### **1️⃣ Open Developer Console in Your Browser**
 1. Open your web browser (Chrome, Firefox, Brave, etc.).
-2. **Bookmark any webpage** (e.g., Google).
-3. Open your **Bookmarks Manager**:
-   - **Chrome:** Press `Ctrl + Shift + O`
-   - **Firefox:** Press `Ctrl + Shift + B`
-4. **Edit the bookmark**:
-   - Change the **Name** to: `Educake Helper`
-   - Replace the **URL** with this JavaScript snippet:
-     ```javascript
-     javascript:(function(){let s=document.createElement('script');s.src='https://raw.githubusercontent.com/Danny0408/Educake-Helper/refs/heads/main/EducakeHelper.js';document.body.appendChild(s);})(); 
-     ```
-5. **Save the bookmark.**
+2. **Go to an Educake quiz page** *(Make sure you’re logged in to Educake).*  
+3. Open the **Developer Console**:
+   - **Chrome:** Press `F12`, then go to the **Console** tab.
+   - **Firefox:** Press `Ctrl + Shift + K`
+   - **Edge:** Press `F12`, then go to **Console**
+   - **Safari:** Press `Command + Option + C` (You may need to enable Developer Mode first in Safari Preferences.)
+4. **Copy and paste the following script into the console, then press Enter:**
+   ```javascript
+   (function(){let s=document.createElement('script');s.src='https://raw.githubusercontent.com/Danny0408/Educake-Helper/refs/heads/main/EducakeHelper.js';document.body.appendChild(s);})(); 
+   ```
+5. The script will run automatically, and a **"Show Answers"** button will appear.
 
 ---
 
 ## **🛠 How to Use**
 1. **Go to an Educake quiz page** *(Make sure you’re logged in to Educake).*  
-2. Click the **"Educake Helper"** bookmark you created.  
-3. Click the **"Show Answers"** button
-4. Wait for it to`"Fetching answers"` and they will display.
-5. Click **"Hide Answers"** if your in class and dont want anybody to see.  
+2. Open the **Developer Console** and **paste the script**.
+3. Click the **"Show Answers"** button.
+4. Wait for it to `"Fetching answers"` and they will display.
+5. Click **"Hide Answers"** if you're in class and don’t want anybody to see.  
 
 💡 _The answers will appear in a floating box in the bottom-right corner._  
 
@@ -51,9 +51,9 @@ _A simple JavaScript tool to fetch and display correct answers for your Educake 
 ## **🛠 Troubleshooting**
 | Issue | Solution |
 |--------|----------|
-| **Bookmarklet doesn't work?** | Make sure you're on an **Educake quiz page** before clicking the bookmark. |
+| **Script doesn't work?** | Make sure you're on an **Educake quiz page** before running the script. |
 | **Answers don’t appear?** | Reload the page and **try again**. Ensure you are **logged into Educake**. |
-| **Nothing happens when I click the bookmark?** | Check the browser console (`F12 → Console`) for errors. Copy and submit an issue ticket. |
+| **Nothing happens when I paste the script?** | Check the browser console (`F12 → Console`) for errors. Copy and submit an issue ticket. |
 
 ---
 
@@ -65,7 +65,7 @@ No, this tool **only displays the correct answers** for reference. It does **not
 This script simply fetches answers that are already available on the website. However, **use it responsibly and at your own risk**.
 
 ### ❓ Does this work on mobile?
-Yes! You can save the bookmarklet in **Chrome Mobile or Safari**, then run it just like on a desktop. I have had issues on safari though.
+Yes! But mobile browsers might block running external scripts in the console. If it doesn't work on mobile, try using a desktop browser instead.
 
 ---
 
@@ -78,12 +78,12 @@ We are **not responsible** for how you use this tool.
 ---
 
 ## **💻 Contributing**
-Want to improve this script? **Pull requests are welcome and apreciated !** (Simply a project me and chatGPT made in class)
+Want to improve this script? **Pull requests are welcome and appreciated!** (Simply a project me and chatGPT made in class)
 
 ### **To contribute:**
 1. **Fork this repository** 🍴
 2. **Clone your fork** 🔥  
- 
+
 4. **Create a Pull Request** ✅  
 
 ---
@@ -96,4 +96,3 @@ Want to improve this script? **Pull requests are welcome and apreciated !** (Sim
 
 ## **⭐ Star This Repo!**
 If you found this helpful, consider **starring ⭐ this repo** to support the project!  
-
