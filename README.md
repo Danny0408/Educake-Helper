@@ -25,7 +25,7 @@ _A simple JavaScript tool to fetch and display correct answers for your Educake 
    - Change the **Name** to: `Educake Helper`
    - Replace the **URL** with this JavaScript snippet:
      ```javascript
-     javascript:(function(){let s=document.createElement('script');s.src='https://raw.githubusercontent.com/YOUR-USERNAME/YOUR-REPO/main/educake-helper.js';document.body.appendChild(s);})(); 
+     javascript:(function(){let s=document.createElement('script');s.src='https://raw.githubusercontent.com/Danny0408/Educake-Helper/refs/heads/main/EducakeHelper.js';document.body.appendChild(s);})(); 
      ```
    - *(Replace `YOUR-USERNAME/YOUR-REPO` with your actual GitHub repository details.)*
 5. **Save the bookmark.**
