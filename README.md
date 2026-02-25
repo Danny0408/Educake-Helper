@@ -2,7 +2,7 @@
 _An automation tool that turns Educake into a "tap-and-go" experience. It types answers and selects multiple-choice buttons for you._
 
 ---
-<img src="https://github.com/Danny0408/Educake-Helper/blob/main/Preview1.png" width="300">
+<img src="https://github.com/Danny0408/Educake-Helper/blob/main/preview1.png" width="300">
 <img src="https://github.com/Danny0408/Educake-Helper/blob/main/Preview2.png" width="300">
 <img src="https://github.com/Danny0408/Educake-Helper/blob/main/Preview3.png" width="300">
 ---
@@ -12,7 +12,7 @@ _An automation tool that turns Educake into a "tap-and-go" experience. It types 
 ✔️ **Auto-Type** – Detects text boxes and types the correct answer.  
 ✔️ **Auto-Select** – Uses `MouseEvent` simulation to automatically find and click the correct multiple-choice buttons.  
 ✔️ **Smart Observer** – Automatically detects when you move to a new question and triggers the appropriate action.  
-✔️ **Neon Stealth UI** – A minimalist, glowing status bar that tells you exactly what to do without blocking the questions.  
+✔️ **Neon Stealth UI** – glowing status bar that tells you exactly what to do.  
 ✔️ **F2 Force Trigger** – A manual override key to force-fill a question if the auto-detection hangs.
 
 ---
