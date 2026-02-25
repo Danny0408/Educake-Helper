@@ -25,7 +25,12 @@ _An automation tool that turns Educake into a "tap-and-go" experience. It types 
    - **Mac:** `Command + Option + J` or `Command + Option + i` for some 
 3. **Paste the following loader and press Enter:**
    ```javascript
-   fetch("[https://raw.githubusercontent.com/Danny0408/Educake-Helper/refs/heads/main/EducakeHelper.js)")
-   .then(response => response.text())
-   .then(script => eval(script))
-   .catch(error => console.error("Error loading script:", error));
+   fetch("https://raw.githubusercontent.com/Danny0408/Educake-Helper/main/EducakeHelper.js")
+   .then(r => r.text())
+   .then(eval)
+   .catch(e => console.error("Error loading Educake Helper:", e));
+   ```
+   OR
+   ```javascript
+     fetch("https://raw.githubusercontent.com/Danny0408/Educake-Helper/main/EducakeHelper.js").then(r=>r.text()).then(eval);
+   ```
