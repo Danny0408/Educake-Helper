@@ -3,8 +3,8 @@ _An automation tool that turns Educake into a "tap-and-go" experience. It types 
 
 ---
 <img src="https://github.com/Danny0408/Educake-Helper/blob/main/preview1.png" width="300">
-<img src="https://github.com/Danny0408/Educake-Helper/blob/main/Preview2.png" width="300">
-<img src="https://github.com/Danny0408/Educake-Helper/blob/main/Preview3.png" width="300">
+<img src="https://github.com/Danny0408/Educake-Helper/blob/main/preview2.png" width="300">
+<img src="https://github.com/Danny0408/Educake-Helper/blob/main/preview3.png" width="300">
 ---
 
 ## 🚀 Features
