@@ -1,186 +1,97 @@
 (async function() {
-    // Get the authorization token from sessionStorage
-    let authToken = sessionStorage.getItem("token");
+    const authToken = sessionStorage.getItem("token");
+    const getXsrfToken = () => document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1];
+    const xsrfToken = decodeURIComponent(getXsrfToken());
+    const quizId = window.location.pathname.match(/quiz\/(\d+)/)?.[1];
 
-    // Function to get XSRF-TOKEN from cookies
-    function getXsrfToken() {
-        let match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
-        return match ? decodeURIComponent(match[1]) : null;
-    }
-    let xsrfToken = getXsrfToken();
+    if (!authToken || !quizId) return;
 
-    if (!authToken) {
-        alert("Authorization token not found in sessionStorage. Ensure you're logged in.");
-        return;
-    }
+    // Fetch all answers instantly
+    const quizResponse = await fetch(`https://my.educake.co.uk/api/student/quiz/${quizId}`, {
+        headers: { "Authorization": `Bearer ${authToken}`, "X-XSRF-TOKEN": xsrfToken, "Accept": "application/json;version=2" }
+    });
+    const quizData = await quizResponse.json();
+    const qIds = quizData.attempt[quizId]?.questions;
 
-    if (!xsrfToken) {
-        alert("XSRF token not found in cookies. Ensure you're logged in.");
-        return;
-    }
+    const allAnswers = await Promise.all(qIds.map(async (id, i) => {
+        try {
+            const res = await fetch(`https://my.educake.co.uk/api/course/question/${id}/mark`, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${authToken}`, "X-XSRF-TOKEN": xsrfToken, "Content-Type": "application/json", "Accept": "application/json;version=2" },
+                body: JSON.stringify({ givenAnswer: "1" })
+            });
+            const data = await res.json();
+            return { num: i + 1, text: data.answer?.correctAnswers[0] || "" };
+        } catch (e) { return { num: i + 1, text: "" }; }
+    }));
 
-    // Extract Quiz ID from URL
-    let match = window.location.pathname.match(/quiz\/(\d+)/);
-    if (!match) {
-        alert("Make sure you're on the quiz page.");
-        return;
-    }
-    let quizId = match[1];
+    const status = document.createElement("div");
+    Object.assign(status.style, {
+        position: "fixed", bottom: "10px", left: "10px", padding: "8px 15px",
+        background: "rgba(0,0,0,0.9)", color: "#00ff00", borderRadius: "10px",
+        zIndex: "99999", border: "1px solid #00ff00", fontFamily: "monospace", fontSize: "12px",
+        boxShadow: "0 0 10px #00ff00"
+    });
+    document.body.appendChild(status);
 
-    console.log("Quiz ID:", quizId);
-    console.log("Using Auth Token:", authToken);
-    console.log("Using XSRF Token:", xsrfToken);
+    let lastQuestion = 0;
 
-    // Create answer box with loading message
-    createAnswerBox("Fetching answers, please wait...");
+    const fillLogic = () => {
+        const uiMatch = document.body.innerText.match(/Question (\d+) of/i);
+        const currentNum = uiMatch ? parseInt(uiMatch[1]) : null;
+        
+        if (!currentNum || currentNum === lastQuestion) return;
+        
+        const answerData = allAnswers.find(a => a.num === currentNum);
+        if (!answerData || !answerData.text) return;
 
-    try {
-        // Fetch quiz data
-        let quizResponse = await fetch(`https://my.educake.co.uk/api/student/quiz/${quizId}`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json;version=2',
-                'Authorization': `Bearer ${authToken}`,
-                'X-XSRF-TOKEN': xsrfToken
+        lastQuestion = currentNum;
+        const targetAnswer = answerData.text.trim().toLowerCase();
+
+        // 1. AUTO-TYPE LOGIC
+        const input = document.querySelector("input[type='text'], input[type='search'], input[name='answer'], textarea");
+        if (input) {
+            input.focus();
+            input.value = "";
+            let i = 0;
+            const typer = setInterval(() => {
+                if (i < answerData.text.length) {
+                    input.value += answerData.text[i];
+                    input.dispatchEvent(new InputEvent("input", { bubbles: true }));
+                    i++;
+                } else {
+                    clearInterval(typer);
+                    status.innerText = `Q${currentNum}: Typed. Press Enter x2`;
+                }
+            }, 30);
+        }
+
+        // 2. AUTO-BUTTON LOGIC
+        const buttons = document.querySelectorAll("button, [role='button'], .btn, .answer-option, li[data-answer]");
+        buttons.forEach(btn => {
+            const btnText = btn.innerText.trim().toLowerCase();
+            
+            if (btnText === targetAnswer || btnText.includes(targetAnswer)) {
+                // Visual Highlight
+                btn.style.outline = "8px solid #00ff00";
+                btn.style.backgroundColor = "#003300";
+
+                // Forceful Click Sequence
+                const opts = { bubbles: true, cancelable: true, view: window };
+                btn.dispatchEvent(new MouseEvent("mousedown", opts));
+                btn.dispatchEvent(new MouseEvent("mouseup", opts));
+                btn.dispatchEvent(new MouseEvent("click", opts));
+                
+                status.innerText = `Q${currentNum}: Auto-Clicked! Press Enter`;
             }
         });
+    };
 
-        if (!quizResponse.ok) throw new Error("Failed to fetch quiz data.");
+    setInterval(fillLogic, 600);
 
-        let quizData = await quizResponse.json();
+    window.addEventListener("keydown", (e) => {
+        if (e.key === "F2") { lastQuestion = -1; fillLogic(); }
+    });
 
-        // Extract question IDs
-        let questionIds = quizData.attempt[quizId]?.questions;
-        if (!questionIds || questionIds.length === 0) {
-            updateAnswerBox("No questions found in the quiz.");
-            return;
-        }
-
-        console.log(`Found ${questionIds.length} questions.`);
-
-        let answers = [];
-
-        // Fetch correct answers for each question
-        for (let i = 0; i < questionIds.length; i++) {
-            let questionId = questionIds[i];
-            try {
-                let response = await fetch(`https://my.educake.co.uk/api/course/question/${questionId}/mark`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json;version=2',
-                        'Authorization': `Bearer ${authToken}`,
-                        'X-XSRF-TOKEN': xsrfToken,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ "givenAnswer": "1" }) // Dummy answer to get correct answer
-                });
-
-                if (!response.ok) {
-                    console.warn(`Failed to fetch answer for Question ${i + 1} (ID: ${questionId})`);
-                    continue;
-                }
-
-                let data = await response.json();
-
-                // Check if response contains the correct answer
-                let correctAnswer = data.answer?.correctAnswers?.join(", ");
-                if (correctAnswer) {
-                    answers.push(`Question ${i + 1}: <b>${correctAnswer}</b>`);
-                } else {
-                    answers.push(`Question ${i + 1}: No answer found`);
-                }
-
-            } catch (error) {
-                console.error(`Error fetching answer for Question ${i + 1} (ID: ${questionId}):`, error);
-            }
-        }
-
-        if (answers.length === 0) {
-            updateAnswerBox("No answers were retrieved.");
-        } else {
-            updateAnswerBox(answers.join("<br><br>"));
-        }
-
-    } catch (error) {
-        console.error("Error:", error);
-        updateAnswerBox("An error occurred while fetching answers.");
-    }
-
-    // Function to create the floating answer box
-    function createAnswerBox(initialMessage) {
-        if (document.getElementById("answerBox")) return;
-
-        let answerBox = document.createElement("div");
-        answerBox.id = "answerBox";
-        answerBox.style.position = "fixed";
-        answerBox.style.bottom = "20px";
-        answerBox.style.right = "20px";
-        answerBox.style.width = "350px";
-        answerBox.style.maxHeight = "400px";
-        answerBox.style.overflowY = "auto";
-        answerBox.style.padding = "15px";
-        answerBox.style.background = "rgba(0, 0, 0, 0.9)";
-        answerBox.style.color = "#fff";
-        answerBox.style.borderRadius = "10px";
-        answerBox.style.boxShadow = "0 0 10px rgba(0, 255, 0, 0.5)";
-        answerBox.style.fontFamily = "Arial, sans-serif";
-        answerBox.style.fontSize = "14px";
-        answerBox.style.zIndex = "9999";
-        answerBox.style.display = "none"; // Hidden by default
-
-        let answerContent = document.createElement("div");
-        answerContent.id = "answerContent";
-        answerContent.innerHTML = initialMessage;
-
-        let closeButton = document.createElement("button");
-        closeButton.innerText = "Close";
-        closeButton.style.marginTop = "10px";
-        closeButton.style.padding = "5px 10px";
-        closeButton.style.border = "none";
-        closeButton.style.borderRadius = "5px";
-        closeButton.style.background = "#ff3333";
-        closeButton.style.color = "#fff";
-        closeButton.style.cursor = "pointer";
-        closeButton.onclick = function() {
-            answerBox.style.display = "none";
-        };
-
-        answerBox.appendChild(answerContent);
-        answerBox.appendChild(closeButton);
-        document.body.appendChild(answerBox);
-
-        let toggleButton = document.createElement("button");
-        toggleButton.innerText = "Show Answers";
-        toggleButton.id = "toggleButton";
-        toggleButton.style.position = "fixed";
-        toggleButton.style.bottom = "20px";
-        toggleButton.style.left = "20px";
-        toggleButton.style.padding = "10px";
-        toggleButton.style.border = "none";
-        toggleButton.style.borderRadius = "5px";
-        toggleButton.style.background = "#00ff00";
-        toggleButton.style.color = "#000";
-        toggleButton.style.cursor = "pointer";
-        toggleButton.style.zIndex = "9999";
-        toggleButton.onclick = function() {
-            let box = document.getElementById("answerBox");
-            if (box.style.display === "none") {
-                box.style.display = "block";
-                toggleButton.innerText = "Hide Answers";
-            } else {
-                box.style.display = "none";
-                toggleButton.innerText = "Show Answers";
-            }
-        };
-
-        document.body.appendChild(toggleButton);
-    }
-
-    // Function to update the answer box content
-    function updateAnswerBox(content) {
-        let answerContent = document.getElementById("answerContent");
-        if (answerContent) {
-            answerContent.innerHTML = content;
-        }
-    }
+    status.innerText = "FULL AUTO ACTIVE - F2 TO FORCE";
 })();
