@@ -21,7 +21,7 @@ _An automation tool that turns Educake into a "tap-and-go" experience. It types 
 ### 1️⃣ Open Developer Console
 1. Log in to [Educake](https://my.educake.co.uk/) and start your quiz.
 2. Open the **Developer Console**:
-   - **Windows/Linux:** `F12` or `Ctrl + Shift + J`
+   - **Windows/Linux:** `F12` or `Ctrl + Shift + i`
    - **Mac:** `Command + Option + J` or `Command + Option + i` for some 
 3. **Paste the following loader and press Enter:**
    ```javascript
