@@ -26,12 +26,12 @@ _THis ful auto branch has minor bugs and sometimes gets questions wrong or refus
    - **Mac:** `Command + Option + J` or `Command + Option + i` for some 
 3. **Paste the following loader and press Enter:**
    ```javascript
-   fetch("https://raw.githubusercontent.com/Danny0408/Educake-Helper/main/EducakeHelper.js")
+   fetch("https://github.com/Danny0408/Educake-Helper/blob/Ful-Auto/EducakeHelper.js")
    .then(r => r.text())
    .then(eval)
    .catch(e => console.error("Error loading Educake Helper:", e));
    ```
    OR
    ```javascript
-     fetch("https://raw.githubusercontent.com/Danny0408/Educake-Helper/main/EducakeHelper.js").then(r=>r.text()).then(eval);
+     fetch("https://github.com/Danny0408/Educake-Helper/blob/Ful-Auto/EducakeHelper.js").then(r=>r.text()).then(eval);
    ```
