@@ -6,7 +6,7 @@
 
     if (!authToken || !quizId) return;
 
-    // Fetch all answers instantly
+    // Fetch Answers (Pre-load)
     const quizResponse = await fetch(`https://my.educake.co.uk/api/student/quiz/${quizId}`, {
         headers: { "Authorization": `Bearer ${authToken}`, "X-XSRF-TOKEN": xsrfToken, "Accept": "application/json;version=2" }
     });
@@ -29,14 +29,26 @@
     Object.assign(status.style, {
         position: "fixed", bottom: "10px", left: "10px", padding: "8px 15px",
         background: "rgba(0,0,0,0.9)", color: "#00ff00", borderRadius: "10px",
-        zIndex: "99999", border: "1px solid #00ff00", fontFamily: "monospace", fontSize: "12px",
-        boxShadow: "0 0 10px #00ff00"
+        zIndex: "99999", border: "1px solid #00ff00", fontFamily: "monospace", fontSize: "12px"
     });
     document.body.appendChild(status);
 
     let lastQuestion = 0;
+    let isProcessing = false;
 
-    const fillLogic = () => {
+    // Direct Enter simulation
+    const pressEnter = () => {
+        ['keydown', 'keyup', 'keypress'].forEach(type => {
+            const ev = new KeyboardEvent(type, {
+                key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true
+            });
+            document.activeElement.dispatchEvent(ev);
+        });
+    };
+
+    const fullAutoLogic = async () => {
+        if (isProcessing) return; 
+        
         const uiMatch = document.body.innerText.match(/Question (\d+) of/i);
         const currentNum = uiMatch ? parseInt(uiMatch[1]) : null;
         
@@ -45,53 +57,55 @@
         const answerData = allAnswers.find(a => a.num === currentNum);
         if (!answerData || !answerData.text) return;
 
+        isProcessing = true;
         lastQuestion = currentNum;
-        const targetAnswer = answerData.text.trim().toLowerCase();
+        status.innerText = `Q${currentNum}: TYPING...`;
 
-        // 1. AUTO-TYPE LOGIC
-        const input = document.querySelector("input[type='text'], input[type='search'], input[name='answer'], textarea");
+        const input = document.querySelector("input[type='text'], input[name='answer'], textarea");
         if (input) {
             input.focus();
-            input.value = "";
-            let i = 0;
-            const typer = setInterval(() => {
-                if (i < answerData.text.length) {
-                    input.value += answerData.text[i];
-                    input.dispatchEvent(new InputEvent("input", { bubbles: true }));
-                    i++;
-                } else {
-                    clearInterval(typer);
-                    status.innerText = `Q${currentNum}: Typed. Press Enter x2`;
-                }
-            }, 30);
+            input.value = answerData.text; // Instant input instead of char-by-char for reliability
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            
+            // Wait for the UI to register the text
+            await new Promise(r => setTimeout(r, 400));
+            
+            // 1. SUBMIT
+            status.innerText = `Q${currentNum}: SUBMITTING...`;
+            pressEnter(); 
+            
+            // 2. WAIT FOR FEEDBACK SCREEN
+            // This needs to be long enough for the "Correct" message to appear
+            await new Promise(r => setTimeout(r, 1000)); 
+            
+            // 3. NEXT QUESTION
+            status.innerText = `Q${currentNum}: NEXT...`;
+            pressEnter(); 
+            
+            // Final breather to allow the next Q to load
+            await new Promise(r => setTimeout(r, 500));
         }
 
-        // 2. AUTO-BUTTON LOGIC
-        const buttons = document.querySelectorAll("button, [role='button'], .btn, .answer-option, li[data-answer]");
-        buttons.forEach(btn => {
+        // BUTTONS (Unchanged)
+        const buttons = document.querySelectorAll("button, [role='button'], .btn, .answer-option");
+        for (let btn of buttons) {
             const btnText = btn.innerText.trim().toLowerCase();
-            
-            if (btnText === targetAnswer || btnText.includes(targetAnswer)) {
-                // Visual Highlight
-                btn.style.outline = "8px solid #00ff00";
-                btn.style.backgroundColor = "#003300";
+            const target = answerData.text.trim().toLowerCase();
 
-                // Forceful Click Sequence
-                const opts = { bubbles: true, cancelable: true, view: window };
-                btn.dispatchEvent(new MouseEvent("mousedown", opts));
-                btn.dispatchEvent(new MouseEvent("mouseup", opts));
-                btn.dispatchEvent(new MouseEvent("click", opts));
-                
-                status.innerText = `Q${currentNum}: Auto-Clicked! Press Enter`;
+            if (btnText === target || btnText.includes(target)) {
+                btn.click(); 
+                await new Promise(r => setTimeout(r, 600)); 
+                pressEnter(); 
+                await new Promise(r => setTimeout(r, 1000)); 
+                pressEnter(); 
+                break;
             }
-        });
+        }
+
+        isProcessing = false;
+        status.innerText = `READY - Q${currentNum} DONE`;
     };
 
-    setInterval(fillLogic, 600);
-
-    window.addEventListener("keydown", (e) => {
-        if (e.key === "F2") { lastQuestion = -1; fillLogic(); }
-    });
-
-    status.innerText = "FULL AUTO ACTIVE - F2 TO FORCE";
+    setInterval(fullAutoLogic, 1000);
+    status.innerText = "FULL AUTO ACTIVE";
 })();
